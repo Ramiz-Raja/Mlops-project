@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install dependencies
         run: |
@@ -29,6 +29,15 @@ jobs:
           WANDB_ENTITY: ${{ secrets.WANDB_ENTITY }}
         run: |
           python src/train.py
+
+      - name: Upload model artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-joblib
+          path: |
+            tmp_model/*.joblib
+            model.joblib
 
       - name: Notify deploy workflow via repository_dispatch
         # This triggers deploy-service.yml (which listens to repository_dispatch)

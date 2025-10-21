@@ -33,7 +33,9 @@ jobs:
           context: .
           file: Dockerfile.backend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlopsproject-backend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlopsproject-backend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlopsproject-backend:${{ github.sha }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
@@ -41,4 +43,6 @@ jobs:
           context: .
           file: Dockerfile.frontend
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlopsproject-frontend:latest
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlopsproject-frontend:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/mlopsproject-frontend:${{ github.sha }}
