@@ -1,0 +1,48 @@
+# Python
+venv/
+ENV/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Jupyter
+.ipynb_checkpoints
+
+# Byte-compiled / optimized / DLL files
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# VSCode
+.vscode/
+
+# Model/artifacts
+artifacts/
+tmp_model/
+model.joblib
+
+# Docker
+**/node_modules/
+*.env
+*.env.local
+Dockerfile.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+*.pkl
+*.joblib
+venv/
+.env
+wandb/
+*.ipynb_checkpoints
+/model_versions/

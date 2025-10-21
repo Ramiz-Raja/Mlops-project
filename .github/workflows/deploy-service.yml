@@ -1,0 +1,80 @@
+# .github/workflows/deploy-service.yml
+name: Build and Deploy Services
+
+on:
+  repository_dispatch:
+    types: [ new-model-registered ]
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up QEMU (for multi-arch if needed)
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile.backend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlops-backend:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile.frontend
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mlops-frontend:latest
+
+  deploy-cloudrun:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    if: ${{ secrets.GCP_PROJECT != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: ${{ secrets.GCP_PROJECT }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Deploy Backend to Cloud Run
+        run: |
+          gcloud run deploy mlops-backend \
+            --image=$DOCKERHUB_USERNAME/mlops-backend:latest \
+            --region=$GCP_REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --project=${{ secrets.GCP_PROJECT }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+
+      - name: Deploy Frontend to Cloud Run
+        run: |
+          gcloud run deploy mlops-frontend \
+            --image=$DOCKERHUB_USERNAME/mlops-frontend:latest \
+            --region=$GCP_REGION \
+            --platform=managed \
+            --allow-unauthenticated \
+            --project=${{ secrets.GCP_PROJECT }}
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          GCP_REGION: ${{ secrets.GCP_REGION }}

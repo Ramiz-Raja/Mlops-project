@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    # image name uses DOCKERHUB_USERNAME and TAG env vars (set them locally before push)
+    image: "${DOCKERHUB_USERNAME:-yourusername}/mlopsproject-backend:${TAG:-latest}"
+    ports:
+      - "8000:8000"
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - WANDB_PROJECT=${WANDB_PROJECT:-mlops-capstone}
+      - WANDB_ENTITY=${WANDB_ENTITY}
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: "${DOCKERHUB_USERNAME:-yourusername}/mlopsproject-frontend:${TAG:-latest}"
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend

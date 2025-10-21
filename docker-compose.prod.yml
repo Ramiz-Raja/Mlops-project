@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  backend:
+    # Ensure we don't inherit the `build` key from the base compose file
+    build: null
+    image: "${DOCKERHUB_USERNAME:-yourusername}/mlopsproject-backend:${TAG:-latest}"
+    ports:
+      - "8000:8000"
+    environment:
+      - WANDB_API_KEY=${WANDB_API_KEY}
+      - WANDB_PROJECT=${WANDB_PROJECT:-mlops-capstone}
+      - WANDB_ENTITY=${WANDB_ENTITY}
+    restart: unless-stopped
+    healthcheck:
+      # Use a Python-based HTTP probe since the slim image may not include curl/wget
+      # Hit the /health endpoint (the app returns 200 at /health)
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; urllib.request.urlopen('http://127.0.0.1:8000/health');\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  frontend:
+    # Ensure we don't inherit the `build` key from the base compose file
+    build: null
+    image: "${DOCKERHUB_USERNAME:-yourusername}/mlopsproject-frontend:${TAG:-latest}"
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
