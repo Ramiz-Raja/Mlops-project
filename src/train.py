@@ -20,7 +20,7 @@ def main():
     X, y = data.data, data.target
     feature_names = data.feature_names
 
-    # Split
+    # Split data
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
     # Model pipeline
@@ -29,24 +29,30 @@ def main():
         ('rf', RandomForestClassifier(n_estimators=100, random_state=42))
     ])
 
+    # Train and evaluate
     model.fit(X_train, y_train)
     preds = model.predict(X_test)
     acc = accuracy_score(y_test, preds)
-    print("✅ Accuracy:", acc)
+    print(f"✅ Accuracy: {acc:.4f}")
 
-    # Save model
+    # === Save model to tmp_model/ ===
+    os.makedirs("tmp_model", exist_ok=True)
     model_filename = f"model_{uuid.uuid4().hex}.joblib"
-    model_path = f"./artifacts/{model_filename}"
-    os.makedirs("artifacts", exist_ok=True)
+    model_path = f"tmp_model/{model_filename}"
     joblib.dump(model, model_path)
+    print(f"✅ Model saved locally at {model_path}")
 
-    # Log model to W&B
-    artifact = wandb.Artifact("model", type="model", metadata={"accuracy": acc, "features": feature_names.tolist()})
+    # === Log to Weights & Biases ===
+    artifact = wandb.Artifact(
+        name="model",
+        type="model",
+        metadata={"accuracy": acc, "features": feature_names.tolist()}
+    )
     artifact.add_file(model_path)
     run.log_artifact(artifact, aliases=["latest"])
 
     run.finish()
-    print(f"✅ Training done. Model saved: {model_path}")
+    print("🏁 Training complete and model logged to W&B.")
 
 if __name__ == "__main__":
     main()

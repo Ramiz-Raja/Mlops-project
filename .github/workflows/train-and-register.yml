@@ -9,6 +9,7 @@ on:
 jobs:
   train:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,13 +35,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: model-joblib
-          path: |
-            tmp_model/*.joblib
-            model.joblib
+          name: trained-model
+          path: tmp_model/*.joblib
 
       - name: Notify deploy workflow via repository_dispatch
-        # This triggers deploy-service.yml (which listens to repository_dispatch)
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
