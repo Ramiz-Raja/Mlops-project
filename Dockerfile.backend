@@ -15,6 +15,8 @@ COPY src /app/src
 
 # Set PYTHONPATH so the app can import src modules when we run uvicorn from /app
 ENV PYTHONPATH=/app/src
+# If a local model.joblib exists in repo root, copy it into the image so the service can use it
+COPY model.joblib /app/model.joblib
 
 EXPOSE 8000
 
