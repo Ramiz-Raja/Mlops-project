@@ -4,10 +4,8 @@ import pandas as pd
 import io
 import os
 
-# Determine backend URL. Prefer environment variable `API_URL` (set in docker-compose),
-# otherwise default to the backend service name used inside Docker Compose.
-# For local development you can override by setting API_URL to http://127.0.0.1:8000
-API_URL = os.environ.get("API_URL") or "http://backend:8000"
+# Allow overriding the backend address via environment (set by docker-compose to http://backend:8000)
+API_URL = os.environ.get("API_URL") or os.environ.get("BACKEND_URL") or "http://127.0.0.1:8000"
 st.set_page_config(page_title="MLOps Capstone Inference", page_icon="🤖")
 
 # Custom styles to make headings and badges prettier
@@ -24,10 +22,6 @@ st.markdown("<div class='big-title'>🤖 MLOps Capstone — Breast Cancer Predic
 st.markdown("<div class='subtitle'>Predicts whether a tumor is malignant or benign using 30 numeric features (same order as training dataset).</div>", unsafe_allow_html=True)
 
 st.write("---")
-
-# show resolved API endpoint in the sidebar for debugging
-st.sidebar.markdown("**Backend API**")
-st.sidebar.write(API_URL)
 
 import os
 import requests
